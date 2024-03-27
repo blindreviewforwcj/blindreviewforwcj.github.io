@@ -1,0 +1,23 @@
+
+Buffer size = 1
+States:      8519178360 (1 initial)
+Transitions: 62069110848
+
+134 iterations in 103.90 seconds 
+model checking in 284.62
+
+
+
+
+Buffer size = 2
+
+States:      9011138761 (1 initial)
+Transitions: 80069110838
+
+134 iterations in 380.20 seconds 
+
+model checking in 602
+
+Buffer size = 3
+
+impossible

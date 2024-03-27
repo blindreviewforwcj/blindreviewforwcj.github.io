@@ -1,0 +1,327 @@
+dtmc
+
+// Constants with clear descriptions
+const int MAX_QUEUE;  	 	 // Maximum size of the queue
+const int MAX_WV_TRANSMISSIONS=10;  // Maximum size of the queue
+const int MAX_WL_TRANSMISSIONS=10;  // Maximum size of the queue
+const int MAX_RP_TRANSMISSIONS=10;
+const int FREQ = 4;       	// Frequency of successful payload transmission (adjust as needed)
+const int EMPTY = 0;      	// Indicator for an empty queue
+const bool active =true;
+const bool inactive =false;
+
+module WVSensorSideModule
+
+// True if device is in receiving mode (previously "receiving")
+wv_receiving: bool init true;
+
+// True if the latest received payload is correct
+wv_correct_payload: bool init false;
+
+// Status of the Watchdog (WV) on the sender side
+wv_status_sender: bool init inactive;  // Previously "wv_status"
+
+// Number of transmissions processed by the WV
+wv_transmissions: [0..MAX_WV_TRANSMISSIONS] init 0;
+
+// Transition for receiving a payload (previously "receive")
+[wv_receive] wv_receiving & wv_status_sender = active & wv_transmissions <MAX_WV_TRANSMISSIONS ->
+  1/FREQ: (wv_correct_payload' = true) & (wv_receiving' = true) & (wv_transmissions' = wv_transmissions + 1)  // Successful transmission, update WV events
+  + (1-1/FREQ): (wv_correct_payload' = false) & (wv_receiving' = true) & (wv_transmissions' = wv_transmissions + 1); // Unsuccessful transmission, update WV events
+
+// Transition for enqueuing the payload
+[wv_enqueue] !wv_receiving -> (wv_correct_payload' = false) & (wv_receiving' = false); // Reset for next cycle
+
+// WV activation (new action for WV)
+[activate_wv]
+wv_status_sender = inactive -> (wv_status_sender' = active);
+
+// WV deactivation (new action for WV)
+[deactivate_wv]
+wv_status_sender = active -> (wv_status_sender' = inactive);
+
+endmodule
+
+// SensorSideModule with explicit state names, detailed comments, and renamed variables
+module RPSensorSideModule
+
+// True if device is in receiving mode
+rp_receiving: bool init true;
+
+// True if the latest received payload is correct
+rp_correct_payload: bool init false;
+
+// Status of the RP on the sender side
+rp_status_sender: bool init inactive;
+
+// Number of transmissions processed by the RP
+rp_transmissions: [0..MAX_RP_TRANSMISSIONS] init 0;
+
+// Transition for receiving a payload
+[rp_receive] !rp_receiving & rp_status_sender = active & rp_transmissions < MAX_RP_TRANSMISSIONS ->
+  1/FREQ: (rp_correct_payload' = true) & (rp_receiving' = true) & (rp_transmissions' = rp_transmissions + 1)  // Successful transmission, update RP events
+  + (1-1/FREQ): (rp_correct_payload' = false) & (rp_receiving' = true) & (rp_transmissions' = rp_transmissions + 1); // Unsuccessful transmission, update RP events
+
+// Transition for enqueuing the payload
+[rp_enqueue] rp_receiving -> (rp_correct_payload' = false) & (rp_receiving' = false); // Reset for next cycle
+
+// RP activation
+[activate_rp]
+rp_status_sender = inactive -> (rp_status_sender' = active);
+
+// RP deactivation
+[deactivate_rp]
+rp_status_sender = active -> (rp_status_sender' = inactive);
+
+endmodule
+
+// SensorSideModule with explicit state names, detailed comments, and WL variables
+module WLSensorSideModule
+
+// True if device is in receiving mode (previously "wv_receiving")
+wl_receiving: bool init true;
+
+// True if the latest received payload is correct
+wl_correct_payload: bool init false;
+
+// Status of the Watchdog (WL) on the sender side
+wl_status_sender: bool init inactive;
+
+// Number of transmissions processed by the WL
+wl_transmissions: [0..MAX_WL_TRANSMISSIONS] init 0;
+
+// Transition for receiving a payload (previously "[wv_receive]")
+[wl_receive] !wl_receiving & wl_status_sender = active & wl_transmissions < MAX_WL_TRANSMISSIONS ->
+  1/FREQ: (wl_correct_payload' = true) & (wl_receiving' = true) & (wl_transmissions' = wl_transmissions + 1)  // Successful transmission, update WL events
+  + (1-1/FREQ): (wl_correct_payload' = false) & (wl_receiving' = true) & (wl_transmissions' = wl_transmissions + 1); // Unsuccessful transmission, update WL events
+
+// Transition for enqueuing the payload (previously "[wv_enqueue]")
+[wl_enqueue] wl_receiving -> (wl_correct_payload' = false) & (wl_receiving' = false); // Reset for next cycle
+
+// WL activation (previously "activate_wv")
+[activate_wl]
+wl_status_sender = inactive -> (wl_status_sender' = active);
+
+// WL deactivation (previously "deactivate_wv")
+[deactivate_wl]
+wl_status_sender = active -> (wl_status_sender' = inactive);
+
+endmodule
+
+// ExchangeModule with corrected logic, enhanced comments, WV variables, and WV-related updates
+module QueueWVModule
+
+// Number of correct values in the queue
+wv_correctValue: [0..MAX_QUEUE] init 0;
+
+// Number of incorrect values in the queue
+wv_incorrectValue: [0..MAX_QUEUE] init 0;
+
+// Indicates whether a tampered payload has been dequeued
+wv_tampered_payload: bool init false;
+
+// WV status (new variable for WV)
+wv_status: bool init inactive;
+
+// Enqueue operation considering queue limits, payload correctness, and WV status
+[wv_enqueue] 
+wv_status = active & wv_correctValue < MAX_QUEUE & wv_incorrectValue < MAX_QUEUE ->
+  (wv_correctValue' = wv_correctValue + (wv_correct_payload ? 1 : 0)) &
+  (wv_incorrectValue' = wv_incorrectValue + (!wv_correct_payload ? 1 : 0)) ; 
+
+// Dequeue operation with probabilistic choice, queue underflow prevention, payload status update, and WV status
+[wv_dequeue] 
+wv_status = active & ((wv_correctValue > EMPTY) | (wv_incorrectValue > EMPTY)) ->
+  // Probabilistic choice between correct and incorrect queues
+  1/FREQ: (wv_correctValue' = max(0, wv_correctValue - 1)) & (wv_tampered_payload' = false) // Decrement correct queue, set payload integrity, update events
+  + (1-1/FREQ): (wv_incorrectValue' = max(0, wv_incorrectValue - 1)) & (wv_tampered_payload' = true) ;  // Decrement incorrect queue, set payload tampered, update events
+
+// WV activation (new action for WV)
+[activate_wv] 
+wv_status = inactive -> (wv_status' = active);
+
+// WV deactivation (new action for WV)
+[deactivate_wv] 
+wv_status = active -> (wv_status' = inactive);
+
+endmodule
+
+
+// ExchangeModule with changes for WL
+module QueueWLModule
+
+// Number of correct values in the queue
+wl_correctValue: [0..MAX_QUEUE] init 0;
+
+// Number of incorrect values in the queue
+wl_incorrectValue: [0..MAX_QUEUE] init 0;
+
+// Indicates whether a tampered payload has been dequeued
+wl_tampered_payload: bool init false;
+
+// WL status
+wl_status: bool init inactive;
+
+// Enqueue operation considering queue limits, payload correctness, and WL status
+[wl_enqueue]
+wl_status = active & wl_correctValue < MAX_QUEUE & wl_incorrectValue < MAX_QUEUE ->
+  (wl_correctValue' = wl_correctValue + (wl_correct_payload ? 1 : 0)) &
+  (wl_incorrectValue' = wl_incorrectValue + (!wl_correct_payload ? 1 : 0));
+
+// Dequeue operation with probabilistic choice, queue underflow prevention, payload status update, and WL status
+[wl_dequeue]
+wl_status = active & ((wl_correctValue > EMPTY) | (wl_incorrectValue > EMPTY)) ->
+  // Probabilistic choice between correct and incorrect queues
+  1/FREQ: (wl_correctValue' = max(0, wl_correctValue - 1)) & (wl_tampered_payload' = false)  // Decrement correct queue, set payload integrity
+  + (1-1/FREQ): (wl_incorrectValue' = max(0, wl_incorrectValue - 1)) & (wl_tampered_payload' = true);  // Decrement incorrect queue, set payload tampered
+
+// WL activation
+[activate_wl]
+wl_status = inactive -> (wl_status' = active);
+
+// WL deactivation
+[deactivate_wl]
+wl_status = active -> (wl_status' = inactive);
+
+endmodule
+
+// ExchangeModule with changes for RP
+module QueueRPModule
+
+// Number of correct values in the queue
+rp_correctValue: [0..MAX_QUEUE] init 0;
+
+// Number of incorrect values in the queue
+rp_incorrectValue: [0..MAX_QUEUE] init 0;
+
+// Indicates whether a tampered payload has been dequeued
+rp_tampered_payload: bool init false;
+
+// RP status
+rp_status: bool init inactive;
+
+// Enqueue operation considering queue limits, payload correctness, and RP status
+[rp_enqueue]
+rp_status = active & rp_correctValue < MAX_QUEUE & rp_incorrectValue < MAX_QUEUE ->
+  (rp_correctValue' = rp_correctValue + (rp_correct_payload ? 1 : 0)) &  // Assuming "correct_payload" is defined elsewhere
+  (rp_incorrectValue' = rp_incorrectValue + (!rp_correct_payload ? 1 : 0));
+
+// Dequeue operation with probabilistic choice, queue underflow prevention, payload status update, and RP status
+[rp_dequeue]
+rp_status = active & ((rp_correctValue > EMPTY) | (rp_incorrectValue > EMPTY)) ->
+  // Probabilistic choice between correct and incorrect queues
+  1/FREQ: (rp_correctValue' = max(0, rp_correctValue - 1)) & (rp_tampered_payload' = false)  // Decrement correct queue, set payload integrity
+  + (1-1/FREQ): (rp_incorrectValue' = max(0, rp_incorrectValue - 1)) & (rp_tampered_payload' = true);  // Decrement incorrect queue, set payload tampered
+
+// RP activation
+[activate_rp]
+rp_status = inactive -> (rp_status' = active);
+
+// RP deactivation
+[deactivate_rp]
+rp_status = active -> (rp_status' = inactive);
+
+endmodule
+
+
+// ConsumerModule responsible for dequeuing values from an exchange queue
+module ConsumerModule
+
+ // Indicates if the ConsumerModule is currently dequeuing a specifically WV-related value
+  wv_consuming: bool init false;
+
+  // Indicates if the ConsumerModule is currently dequeuing a specifically WL-related value
+  wl_consuming: bool init false;
+
+  // Indicates if the ConsumerModule is currently dequeuing a specifically RP-related value
+  rp_consuming: bool init false;
+
+  // Flag indicating if the module is currently processing  
+  wf_producing: bool init false; 
+
+  // True if the latest received payload is correct
+  wf_correct_payload: bool init true;
+
+  // Dequeue operation to consume a value from the exchange queue
+  [wv_dequeue] !wv_consuming -> (wv_consuming' = true);
+
+  [wl_dequeue] !wl_consuming -> (wl_consuming' = true);
+
+  [rp_dequeue] !rp_consuming -> (rp_consuming' = true);
+
+  // Transition back to non-consuming mode after a value has been processed
+  [process_value] wv_consuming & wl_consuming & rp_consuming -> (wv_consuming' = false) & (wl_consuming' = false) & (rp_consuming' = false) & (wf_producing'= true);
+
+  // Transition for enqueuing the payload
+  [wf_enqueue] !wf_producing -> (wf_producing' = true); // Reset for next cycle
+
+ // Transition for completing the processing of a dequeued value (any type)
+  [finish_processing] wf_producing -> (wf_producing' = false); // Clear processing flag
+
+
+endmodule
+
+
+
+// ExchangeModule with changes for WF
+module QueueWFModule
+
+// Number of correct values in the queue
+wf_correctValue: [0..MAX_QUEUE] init 0;
+
+// Number of incorrect values in the queue
+wf_incorrectValue: [0..MAX_QUEUE] init 0;
+
+// Indicates whether a tampered payload has been dequeued
+wf_tampered_payload: bool init false;
+
+// WF status
+wf_status: bool init inactive;
+
+// Enqueue operation considering queue limits, payload correctness, and WF status
+[wf_enqueue]
+wf_status = active & wf_correctValue < MAX_QUEUE & wf_incorrectValue < MAX_QUEUE ->
+  (wf_correctValue' = wf_correctValue + (wf_correct_payload ? 1 : 0)) &  // Assuming "correct_payload" is defined elsewhere
+  (wf_incorrectValue' = wf_incorrectValue + (!wf_correct_payload ? 1 : 0));
+
+// Dequeue operation with probabilistic choice, queue underflow prevention, payload status update, and WF status
+[wf_dequeue]
+wf_status = active & ((wf_correctValue > EMPTY) | (wf_incorrectValue > EMPTY)) ->
+  // Probabilistic choice between correct and incorrect queues
+  1/FREQ: (wf_correctValue' = max(0, wf_correctValue - 1)) & (wf_tampered_payload' = false)  // Decrement correct queue, set payload integrity
+  + (1-1/FREQ): (wf_incorrectValue' = max(0, wf_incorrectValue - 1)) & (wf_tampered_payload' = true);  // Decrement incorrect queue, set payload tampered
+
+// WF activation
+[activate_wf]
+wf_status = inactive -> (wf_status' = active);
+
+// WF deactivation
+[deactivate_wf]
+wf_status = active -> (wf_status' = inactive);
+
+endmodule
+
+
+module WFSensorSideModule
+
+  // Flag indicating if the module is currently dequeuing or processing a value
+  wfs_active: bool init false;
+
+  // Dequeue operation to attempt consuming a value from the exchange queue
+  [wf_dequeue] !wfs_active -> (wfs_active' = true);
+
+  // Transition back to non-active mode after a value has been processed
+  [process_value] wfs_active -> (wfs_active' = false);
+
+endmodule
+
+
+label "tampered_payload"= wv_tampered_payload | wl_tampered_payload | rp_tampered_payload;
+
+
+
+rewards "utility"
+    [wf_dequeue] wf_correct_payload: 1;
+    [rp_dequeue] rp_correct_payload: 1;
+    [wl_dequeue] wl_correct_payload: 1;
+endrewards
