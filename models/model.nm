@@ -1,0 +1,58 @@
+dtmc
+
+// Constants with clear descriptions
+const int MAX_QUEUE;  	  // Maximum size of the queue
+const int FREQ = 4;       // Frequency of successful payload transmission (adjust as needed)
+const int EMPTY = 0;      // Indicator for an empty queue
+
+// DeviceSideModule with explicit state names and detailed comments
+module DeviceSideModule
+
+  receiving: bool init true;  // True if device is in receiving mode
+  correct_payload: bool init false;  // True if the latest received payload is correct
+
+  // Transition for receiving a payload
+  [receive] !receiving ->
+      1/FREQ: (correct_payload' = true) & (receiving' = true)  // Successful transmission
+    + (1-1/FREQ): (correct_payload' = false) & (receiving' = true);  // Unsuccessful transmission
+
+  // Transition for enqueuing the payload
+  [enqueue] receiving -> (correct_payload' = false) & (receiving' = false);  // Reset for next cycle
+
+endmodule
+
+// ExchangeModule with corrected logic and enhanced comments
+module ExchangeModule
+
+  correctValue: [0..MAX_QUEUE] init 0;  // Number of correct values in the queue
+  incorrectValue: [0..MAX_QUEUE] init 0;  // Number of incorrect values in the queue
+
+  tampered_payload: bool init false;    // Indicates whether a tampered payload has been dequeued
+
+  // Enqueue operation considering queue limits and payload correctness
+  [enqueue] 
+    correctValue < MAX_QUEUE & incorrectValue < MAX_QUEUE ->
+      (correctValue' = correctValue + (correct_payload ? 1 : 0)) &
+      (incorrectValue' = incorrectValue + (!correct_payload ? 1 : 0));
+
+  // Dequeue operation with probabilistic choice, queue underflow prevention, and payload status update
+  [dequeue] 
+   (correctValue > EMPTY) | (incorrectValue > EMPTY) ->  // Ensure at least one value is dequeued
+      // Probabilistic choice between correct and incorrect queues
+      1/FREQ: (correctValue' = max(0, correctValue - 1)) & (tampered_payload' = false)  // Decrement correct queue, set payload integrity
+       + (1-1/FREQ): (incorrectValue' = max(0, incorrectValue - 1)) & (tampered_payload' = true);  // Decrement incorrect queue, set payload tampered
+
+endmodule
+
+// ConsumerModule responsible for dequeuing values from an exchange queue
+module ConsumerModule
+
+  consuming: bool init false;  // True if the ConsumerModule is currently consuming a value
+
+  // Dequeue operation to consume a value from the exchange queue
+  [dequeue] !consuming -> (consuming' = true);
+
+  // Transition back to non-consuming mode after a value has been processed
+  [process_value] consuming -> (consuming' = false);
+
+endmodule
