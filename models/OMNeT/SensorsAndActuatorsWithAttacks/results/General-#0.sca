@@ -1,0 +1,89 @@
+version 3
+run General-0-20240114-16:31:33-107628
+attr configname General
+attr datetime 20240114-16:31:33
+attr datetimef 20240114-163133
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsd ""
+attr iterationvarsf ""
+attr measurement ""
+attr network architecture
+attr processid 107628
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+config image-path images
+config network architecture
+config cmdenv-interactive true
+config record-eventlog true
+config **.recording true
+config **.recorder.moduleType "\"CSVRecorder\""
+config **.recorder.fileName "\"simulation.csv\""
+
+par architecture.RP.data.channel typename "\"ned.DelayChannel\""
+par architecture.RP.data.channel disabled false
+attr mutable ""
+par architecture.RP.data.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.WL.data.channel typename "\"ned.DelayChannel\""
+par architecture.WL.data.channel disabled false
+attr mutable ""
+par architecture.WL.data.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.WV.data.channel typename "\"ned.DelayChannel\""
+par architecture.WV.data.channel disabled false
+attr mutable ""
+par architecture.WV.data.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.Southbound.dataWaterFlow.channel typename "\"ned.DelayChannel\""
+par architecture.Southbound.dataWaterFlow.channel disabled false
+attr mutable ""
+par architecture.Southbound.dataWaterFlow.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.Southbound.data.channel typename "\"ned.DelayChannel\""
+par architecture.Southbound.data.channel disabled false
+attr mutable ""
+par architecture.Southbound.data.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.Exchange.dataToFog.channel typename "\"ned.DelayChannel\""
+par architecture.Exchange.dataToFog.channel disabled false
+attr mutable ""
+par architecture.Exchange.dataToFog.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.Fog.fogToData.channel typename "\"ned.DelayChannel\""
+par architecture.Fog.fogToData.channel disabled false
+attr mutable ""
+par architecture.Fog.fogToData.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.Exchange.decisiondataWaterFlow.channel typename "\"ned.DelayChannel\""
+par architecture.Exchange.decisiondataWaterFlow.channel disabled false
+attr mutable ""
+par architecture.Exchange.decisiondataWaterFlow.channel delay 0.1s
+attr mutable ""
+attr unit s
+par architecture.WL typename "\"WaterLevel\""
+par architecture.WL minFrequency 1
+par architecture.WL maxFrequency 10
+par architecture.RP typename "\"RainPrecipitation\""
+par architecture.RP minFrequency 1
+par architecture.RP maxFrequency 10
+par architecture.WV typename "\"WaterVolume\""
+par architecture.WV minFrequency 1
+par architecture.WV maxFrequency 10
+par architecture.Southbound typename "\"Southbound\""
+par architecture.Exchange typename "\"Exchange\""
+par architecture.WF typename "\"WaterFlow\""
+par architecture.Fog typename "\"Fog\""
+par architecture typename "\"architecture\""
+
