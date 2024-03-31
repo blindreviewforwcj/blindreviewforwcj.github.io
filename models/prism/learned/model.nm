@@ -1,0 +1,22 @@
+dtmc
+
+const int AT;
+module GeneratedDecisiontree
+RP : [0..1] init 1 ;
+WV : [0..1] init 1 ;
+WL : [0..1] init 1 ;
+WF : [-1..1] init -1 ;
+[rule1] RP=1 & WV=1 & WL=1 & AT=0 -> 0.16706586826347307:(WF'=0)  + 0.8329341317365269:(WF'=1) ;
+[rule2] RP=1 & WV=1 & WL=1 & AT=1 -> 0.8450901803607214:(WF'=0)  + 0.15490981963927857:(WF'=1) ;
+endmodule
+
+
+
+label "tampered_payload"= (WF=0);
+
+
+
+rewards "utility"
+    [rule1] WF: 1;
+    [rule2] WF: 1;
+endrewards

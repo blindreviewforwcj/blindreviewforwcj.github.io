@@ -1,0 +1,14 @@
+const int T;
+
+P=? [ (RP=1&WV=1&WL=1)=>(F (WF=1)) ]
+
+P=? [ G ((RP=1&WV=1&WL=1 & WF=-1)=>(F WF=1)) ]
+
+P=? [ ((RP=1&WV=1&WL=1&WF=-1)) U<=T (WF=1) ]
+
+"ready"=>P>=1 [ true U "correct" ]
+
+E [ F "deadlock" ]
+
+filter(print, "deadlock")
+

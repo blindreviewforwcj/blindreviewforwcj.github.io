@@ -1,2 +1,6 @@
+const int T;
+
 P=? [ G ((!"tampered_payload")=>(F "tampered_payload")) ]
+
+R{"utility"}=?[C<=T]
 

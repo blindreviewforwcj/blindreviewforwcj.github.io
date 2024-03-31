@@ -9,8 +9,12 @@ const int FREQ = 4;       	// Frequency of successful payload transmission (adju
 const int EMPTY = 0;      	// Indicator for an empty queue
 const bool active =true;
 const bool inactive =false;
+const int BAN_TIME = 4;   
 
 module WVSensorSideModule
+
+//BANING TIME
+wv_t:[0..BAN_TIME] init BAN_TIME;
 
 // True if device is in receiving mode (previously "receiving")
 wv_receiving: bool init true;
@@ -34,7 +38,11 @@ wv_transmissions: [0..MAX_WV_TRANSMISSIONS] init 0;
 
 // WV activation (new action for WV)
 [activate_wv]
-wv_status_sender = inactive -> (wv_status_sender' = active);
+wv_status_sender = inactive & wv_t>=BAN_TIME-> (wv_status_sender' = active) & (wv_t'=(!wv_tampered_payload? BAN_TIME : 0));
+
+// WV activation (new action for WV)
+[baning_wv]
+wv_status_sender = inactive & wv_t<BAN_TIME->  (wv_t'=wv_t+1);
 
 // WV deactivation (new action for WV)
 [deactivate_wv]
@@ -44,6 +52,9 @@ endmodule
 
 // SensorSideModule with explicit state names, detailed comments, and renamed variables
 module RPSensorSideModule
+
+//BANING TIME
+rp_t:[0..BAN_TIME] init BAN_TIME;
 
 // True if device is in receiving mode
 rp_receiving: bool init true;
@@ -58,25 +69,32 @@ rp_status_sender: bool init inactive;
 rp_transmissions: [0..MAX_RP_TRANSMISSIONS] init 0;
 
 // Transition for receiving a payload
-[rp_receive] !rp_receiving & rp_status_sender = active & rp_transmissions < MAX_RP_TRANSMISSIONS ->
+[rp_receive] rp_receiving & rp_status_sender = active & rp_transmissions < MAX_RP_TRANSMISSIONS ->
   1/FREQ: (rp_correct_payload' = true) & (rp_receiving' = true) & (rp_transmissions' = rp_transmissions + 1)  // Successful transmission, update RP events
   + (1-1/FREQ): (rp_correct_payload' = false) & (rp_receiving' = true) & (rp_transmissions' = rp_transmissions + 1); // Unsuccessful transmission, update RP events
 
 // Transition for enqueuing the payload
-[rp_enqueue] rp_receiving -> (rp_correct_payload' = false) & (rp_receiving' = false); // Reset for next cycle
+[rp_enqueue] !rp_receiving -> (rp_correct_payload' = false) & (rp_receiving' = false); // Reset for next cycle
 
 // RP activation
 [activate_rp]
-rp_status_sender = inactive -> (rp_status_sender' = active);
+rp_status_sender = inactive & rp_t>=BAN_TIME -> (rp_status_sender' = active) & (rp_t'=(!rp_tampered_payload? BAN_TIME : 0));
+
+// RP activation (new action for WV)
+[baning_rp]
+rp_status_sender = inactive & rp_t<BAN_TIME->  (rp_t'=rp_t+1);
 
 // RP deactivation
 [deactivate_rp]
-rp_status_sender = active -> (rp_status_sender' = inactive);
+rp_status_sender = active  -> (rp_status_sender' = inactive);
 
 endmodule
 
 // SensorSideModule with explicit state names, detailed comments, and WL variables
 module WLSensorSideModule
+
+//BANING TIME
+wl_t:[0..BAN_TIME] init BAN_TIME;
 
 // True if device is in receiving mode (previously "wv_receiving")
 wl_receiving: bool init true;
@@ -91,16 +109,20 @@ wl_status_sender: bool init inactive;
 wl_transmissions: [0..MAX_WL_TRANSMISSIONS] init 0;
 
 // Transition for receiving a payload (previously "[wv_receive]")
-[wl_receive] !wl_receiving & wl_status_sender = active & wl_transmissions < MAX_WL_TRANSMISSIONS ->
+[wl_receive] wl_receiving & wl_status_sender = active & wl_transmissions < MAX_WL_TRANSMISSIONS ->
   1/FREQ: (wl_correct_payload' = true) & (wl_receiving' = true) & (wl_transmissions' = wl_transmissions + 1)  // Successful transmission, update WL events
   + (1-1/FREQ): (wl_correct_payload' = false) & (wl_receiving' = true) & (wl_transmissions' = wl_transmissions + 1); // Unsuccessful transmission, update WL events
 
 // Transition for enqueuing the payload (previously "[wv_enqueue]")
-[wl_enqueue] wl_receiving -> (wl_correct_payload' = false) & (wl_receiving' = false); // Reset for next cycle
+[wl_enqueue] !wl_receiving -> (wl_correct_payload' = false) & (wl_receiving' = false); // Reset for next cycle
 
-// WL activation (previously "activate_wv")
+// WL activation (previously "activate_wL")
 [activate_wl]
-wl_status_sender = inactive -> (wl_status_sender' = active);
+wl_status_sender = inactive & wl_t>=BAN_TIME -> (wl_status_sender' = active)& (wl_t'=(!wl_tampered_payload? BAN_TIME : 0));
+
+// WL activation (new action for WL)
+[baning_wl]
+wl_status_sender = inactive & wl_t<BAN_TIME->  (wl_t'=wl_t+1);
 
 // WL deactivation (previously "deactivate_wv")
 [deactivate_wl]
