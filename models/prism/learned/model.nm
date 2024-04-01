@@ -17,6 +17,6 @@ label "tampered_payload"= (WF=0);
 
 
 rewards "utility"
-    [rule1] WF: 1;
-    [rule2] WF: 1;
+    [rule1] WF=1: 1;
+    [rule2] WF=1: 1;
 endrewards
