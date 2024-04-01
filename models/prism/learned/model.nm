@@ -1,21 +1,32 @@
 dtmc
 
+// Define a constant for attack
 const int AT;
+
+
+// Define state variables with descriptions
 module GeneratedDecisiontree
+// Rain precipitation (0: No Rain, 1: Rain)
 RP : [0..1] init 1 ;
+// Water volume (0: No, 1: High)
 WV : [0..1] init 1 ;
+// Water level (0: No, 1: High)
 WL : [0..1] init 1 ;
+// Decision on water flow (-1: Not decided, 0: Tampering, 1: No Tampering)
 WF : [-1..1] init -1 ;
+
+// Rule 1: When raining (RP=1) and all conditions met, choose action with probabilities
 [rule1] RP=1 & WV=1 & WL=1 & AT=0 -> 0.16706586826347307:(WF'=0)  + 0.8329341317365269:(WF'=1) ;
+
+// Rule 2: Similar to rule 1, but with different probabilities for different actions
 [rule2] RP=1 & WV=1 & WL=1 & AT=1 -> 0.8450901803607214:(WF'=0)  + 0.15490981963927857:(WF'=1) ;
 endmodule
 
-
-
+// Define the desired state for successful operation (tampered payload released)
 label "tampered_payload"= (WF=0);
 
 
-
+// Define rewards for actions in each rule
 rewards "utility"
     [rule1] WF=1: 1;
     [rule2] WF=1: 1;
