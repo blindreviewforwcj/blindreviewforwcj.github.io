@@ -1,10 +1,12 @@
 csg
-//IEA AIE 2024
-//author: Abdelhakim Baouya
+//ISSRE 2024
 
-player p1  GeneratedDecisiontree endplayer  //  win 0
-player p2  PDT endplayer //PDT win 1
-
+player Pnd  GeneratedDecisiontree endplayer //System model
+player Pat  PDT endplayer //Attacks  model
+player Ph1  ASASpecialist endplayer //ASA Specialist
+player Ph2  FirewallSecuritySpecialist endplayer //Firewall Security Specialist
+player Ph3  VPNSecuritySpecialist endplayer //VPN Specialist
+player Ph4  IPSSecuritySpecialist endplayer //IPS Specialist
 
 const int UP =1;
 const int DOWN =-1;
@@ -12,6 +14,9 @@ const double PH;
 const double TM;
 const double WL;
 
+const int DDOS =1;
+const int ARP =2;
+const int MITM =3;
 
 const double cost; //The cost of winning
 
@@ -29,6 +34,7 @@ module rounds
 
 endmodule
 
+//System Model
 module GeneratedDecisiontree
 PP : [-1..1] init 0 ;
 [rule1] PH<=2.5 & PH<=1.5 -> 1.0:(PP'=UP) ;
@@ -41,195 +47,312 @@ endmodule
 
 
 
-//PDT Model 
+//Attacks Model 
 module PDT
 	success : [-1..1] init -1 ;
 	//done : [0..1] init 1 ;
-	[att_rule1] type=1 -> 0.49854227405247814:(success'=0)   + 0.5014577259475219:(success'=1)  ;
-	[att_rule2] type=2 -> 0.49117647058823527:(success'=0)   + 0.5088235294117647:(success'=1)  ;
-	[att_rule3] type=3 -> 0.4921135646687697:(success'=0)  + 0.5078864353312302:(success'=1)  ;
+	[att_rule1] type=DDOS -> 0.49854227405247814:(success'=0)   + 0.5014577259475219:(success'=1)  ; //ddos
+	[att_rule2] type=ARP -> 0.49117647058823527:(success'=0)   + 0.5088235294117647:(success'=1)  ; //arp spoofing
+	[att_rule3] type=MITM -> 0.4921135646687697:(success'=0)  + 0.5078864353312302:(success'=1)  ; //MitM
+endmodule
+
+
+module ASASpecialist
+	[Ph1_prob_not] true -> true;
+	[Ph1_almo_cer] true -> true;
+endmodule
+
+module FirewallSecuritySpecialist
+	[Ph2_prob_not] true -> true;
+	[Ph2_almo_cer] true -> true;
+endmodule
+
+module VPNSecuritySpecialist
+	[Ph3_prob_not] true -> true;
+	[Ph3_impossib] true -> true;
+	[Ph3_almo_cer] true -> true;
+endmodule
+
+module IPSSecuritySpecialist
+	[Ph4_almo_cer] true -> true;
+endmodule
+
+
+//register
+module RegisterASASpecialist 
+
+        win_asa : [-1..1] init -1 ;
+	//1 for successful interventions
+	//0 for non successful interventions
+	[Ph1_prob_not,rule1,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule1,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule1,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_prob_not,rule2,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule2,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule2,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_prob_not,rule3,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule3,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule3,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_prob_not,rule4,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule4,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule4,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_prob_not,rule5,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule5,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule5,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_prob_not,rule6,att_rule1] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ; 
+	[Ph1_prob_not,rule6,att_rule2] true -> (win_asa'=0);
+	[Ph1_prob_not,rule6,att_rule3] true -> 0.75:(win_asa'=1)+ 0.25:(win_asa'=0) ;
+
+	[Ph1_almo_cer,rule1,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule1,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule1,att_rule3] true -> (win_asa'=0);
+
+	[Ph1_almo_cer,rule2,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule2,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule2,att_rule3] true -> (win_asa'=0);
+
+	[Ph1_almo_cer,rule3,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule3,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule3,att_rule3] true -> (win_asa'=0);
+
+	[Ph1_almo_cer,rule4,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule4,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule4,att_rule3] true -> (win_asa'=0);
+
+	[Ph1_almo_cer,rule5,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule5,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule5,att_rule3] true -> (win_asa'=0);
+
+	[Ph1_almo_cer,rule6,att_rule1] true -> (win_asa'=0);
+	[Ph1_almo_cer,rule6,att_rule2] true -> 0.93:(win_asa'=1)+ 0.07:(win_asa'=0) ;
+	[Ph1_almo_cer,rule6,att_rule3] true -> (win_asa'=0);
 endmodule
 
 
 
 //register
-module RegisterCertainty //Almost Certainly Not
+module RegisterFirewallSecuritySpecialist 
 
-        win : [-1..1] init -1 ;
+        win_fsa : [-1..1] init -1 ;
 	//1 for successful interventions
 	//0 for non successful interventions
-	[att_rule1, rule1]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule1, rule2]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule1, rule3]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-        [att_rule1, rule4]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule1, rule5]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-        [att_rule1, rule6]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
+	[Ph2_prob_not,rule1,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule1,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule1,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-	[att_rule2, rule1]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule2, rule2]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ;
-	[att_rule2, rule3]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ;
-        [att_rule2, rule4]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ;
-	[att_rule2, rule5]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ;
-        [att_rule2, rule6]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
+	[Ph2_prob_not,rule2,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule2,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule2,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-	[att_rule3, rule1]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule3, rule2]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule3, rule3]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-        [att_rule3, rule4]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-	[att_rule3, rule5]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-        [att_rule3, rule6]   true -> 0.93:(win'=0)+ 0.07:(win'=1) ; 
-endmodule
+	[Ph2_prob_not,rule3,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule3,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule3,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-module RegisterProbablyNot //Probably Not
-        winProbablyNot : [-1..1] init -1 ;
-	//1 for successful interventions
-	//0 for non successful interventions
-	[att_rule1, rule1]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule1, rule2]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule1, rule3]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule1, rule4]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule1, rule5]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule1, rule6]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ;  
+	[Ph2_prob_not,rule4,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule4,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule4,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-	[att_rule2, rule1]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule2, rule2]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule2, rule3]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule2, rule4]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule2, rule5]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule2, rule6]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
+	[Ph2_prob_not,rule5,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule5,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule5,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-	[att_rule3, rule1]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule3, rule2]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule3, rule3]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule3, rule4]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-	[att_rule3, rule5]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-        [att_rule3, rule6]   true -> 0.7:(winProbablyNot'=0)+ 0.3:(winProbablyNot'=1) ; 
-endmodule
+	[Ph2_prob_not,rule6,att_rule1] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ; 
+	[Ph2_prob_not,rule6,att_rule2] true -> (win_fsa'=0);
+	[Ph2_prob_not,rule6,att_rule3] true -> 0.75:(win_fsa'=1)+ 0.25:(win_fsa'=0) ;
 
-module RegisterChancesAboutEven //Chances About Even
-        winChancesAboutEven : [-1..1] init -1 ;
-	//1 for successful interventions
-	//0 for non successful interventions
-	[att_rule1, rule1]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule1, rule2]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule1, rule3]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule1, rule4]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule1, rule5]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule1, rule6]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
+	[Ph2_almo_cer,rule1,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule1,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule1,att_rule3] true -> (win_fsa'=0);
 
-	[att_rule2, rule1]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule2, rule2]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule2, rule3]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule2, rule4]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule2, rule5]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule2, rule6]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
+	[Ph2_almo_cer,rule2,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule2,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule2,att_rule3] true -> (win_fsa'=0);
 
-	[att_rule3, rule1]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule3, rule2]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-	[att_rule3, rule3]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule3, rule4]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ;  
-	[att_rule3, rule5]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
-        [att_rule3, rule6]   true -> 0.5:(winChancesAboutEven'=1)+ 0.5:(winChancesAboutEven'=0) ; 
+	[Ph2_almo_cer,rule3,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule3,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule3,att_rule3] true -> (win_fsa'=0);
+
+	[Ph2_almo_cer,rule4,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule4,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule4,att_rule3] true -> (win_fsa'=0);
+
+	[Ph2_almo_cer,rule5,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule5,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule5,att_rule3] true -> (win_fsa'=0);
+
+	[Ph2_almo_cer,rule6,att_rule1] true -> (win_fsa'=0);
+	[Ph2_almo_cer,rule6,att_rule2] true -> 0.93:(win_fsa'=1)+ 0.07:(win_fsa'=0) ;
+	[Ph2_almo_cer,rule6,att_rule3] true -> (win_fsa'=0);
 endmodule
 
 
-module RegisterProbable //Probable
-        winProbable : [-1..1] init -1 ;
+
+//register
+module RgisterVPNSecuritySpecialist 
+
+        win_vpn : [-1..1] init -1 ;
 	//1 for successful interventions
 	//0 for non successful interventions
-	[att_rule1, rule1]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule1, rule2]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule1, rule3]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule1, rule4]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule1, rule5]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule1, rule6]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
+	[Ph3_prob_not,rule1,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule1,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule1,att_rule3] true -> (win_vpn'=0);
 
-	[att_rule2, rule1]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule2, rule2]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule2, rule3]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule2, rule4]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule2, rule5]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule2, rule6]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
+	[Ph3_prob_not,rule2,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule2,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule2,att_rule3] true -> (win_vpn'=0);
 
-	[att_rule3, rule1]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule3, rule2]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-	[att_rule3, rule3]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule3, rule4]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ;   
-	[att_rule3, rule5]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ; 
-        [att_rule3, rule6]   true -> 0.25:(winProbable'=0)+ 0.75:(winProbable'=1) ;  
+	[Ph3_prob_not,rule3,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule3,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule3,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_prob_not,rule4,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule4,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule4,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_prob_not,rule5,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule5,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule5,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_prob_not,rule6,att_rule1] true -> 0.75:(win_vpn'=1)+ 0.25:(win_vpn'=0) ; 
+	[Ph3_prob_not,rule6,att_rule2] true -> (win_vpn'=0);
+	[Ph3_prob_not,rule6,att_rule3] true -> (win_vpn'=0);
+
+//
+	[Ph3_impossib,rule1,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule1,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule1,att_rule3] true -> (win_vpn'=0); 
+
+	[Ph3_impossib,rule2,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule2,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule2,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_impossib,rule3,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule3,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule3,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_impossib,rule4,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule4,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule4,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_impossib,rule5,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule5,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule5,att_rule3] true -> (win_vpn'=0);
+
+	[Ph3_impossib,rule6,att_rule1] true -> (win_vpn'=0); 
+	[Ph3_impossib,rule6,att_rule2] true -> 0.07:(win_vpn'=1)+ 0.93:(win_vpn'=0) ; 
+	[Ph3_impossib,rule6,att_rule3] true -> (win_vpn'=0);
+
+
+//
+
+	[Ph3_almo_cer,rule1,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule1,att_rule2] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule1,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+
+	[Ph3_almo_cer,rule2,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule2,att_rule2] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule2,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+
+	[Ph3_almo_cer,rule3,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule3,att_rule2] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule3,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+
+	[Ph3_almo_cer,rule4,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule4,att_rule2] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule4,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+
+	[Ph3_almo_cer,rule5,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule5,att_rule2] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+	[Ph3_almo_cer,rule5,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+
+	[Ph3_almo_cer,rule6,att_rule1] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule6,att_rule2] true -> (win_vpn'=0);
+	[Ph3_almo_cer,rule6,att_rule3] true -> 0.93:(win_vpn'=1)+ 0.07:(win_vpn'=0) ;
+endmodule
+
+module RegisterIPSSecuritySpecialist
+
+        win_ips : [-1..1] init -1 ;
+	//1 for successful interventions
+	//0 for non successful interventions
+	[Ph4_almo_cer,rule1,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule1,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule1,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
+	[Ph4_almo_cer,rule2,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule2,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule2,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
+	[Ph4_almo_cer,rule3,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule3,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule3,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
+	[Ph4_almo_cer,rule4,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule4,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule4,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
+	[Ph4_almo_cer,rule5,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule5,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule5,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
+	[Ph4_almo_cer,rule6,att_rule1] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule6,att_rule2] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+	[Ph4_almo_cer,rule6,att_rule3] true -> 0.93:(win_ips'=1)+ 0.07:(win_ips'=0) ;
+
 endmodule
 
 
-module RegisterAlmostCertain //Almost certain
-        winAlmostCertain  : [-1..1] init -1 ;
-	//1 for successful interventions
-	//0 for non successful interventions
-	[att_rule1, rule1]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule1, rule2]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule1, rule3]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-        [att_rule1, rule4]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;  
-	[att_rule1, rule5]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;  
-        [att_rule1, rule6]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
+label  "win"= win_ips=1 & win_vpn=1 & win_fsa=1 & win_asa=1;
 
-	[att_rule2, rule1]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule2, rule2]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule2, rule3]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-        [att_rule2, rule4]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;  
-	[att_rule2, rule5]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-        [att_rule2, rule6]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;  
+formula win= win_ips=1 & win_vpn=1 & win_fsa=1 & win_asa=1;
 
-	[att_rule3, rule1]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule3, rule2]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-	[att_rule3, rule3]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-        [att_rule3, rule4]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;  
-	[att_rule3, rule5]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ; 
-        [att_rule3, rule6]   true -> 0.07:(winAlmostCertain'=0)+ 0.93:(winAlmostCertain'=1) ;   
-endmodule
+label "fail"= win_ips=0 | win_vpn=0 | win_fsa=0 | win_asa=0;
 
-module RegisterCertain //Almost certain
-        winCertain  : [-1..1] init -1 ;
-	//1 for successful interventions
-	//0 for non successful interventions
-	[att_rule1, rule1]   true -> (winCertain'=1) ; 
-	[att_rule1, rule2]   true -> (winCertain'=1) ; 
-	[att_rule1, rule3]   true -> (winCertain'=1) ; 
-        [att_rule1, rule4]   true -> (winCertain'=1) ; 
-	[att_rule1, rule5]   true -> (winCertain'=1) ; 
-        [att_rule1, rule6]   true -> (winCertain'=1) ; 
+formula fail= win_ips=0 | win_vpn=0 | win_fsa=0 | win_asa=0;
 
-	[att_rule2, rule1]   true -> (winCertain'=1) ; 
-	[att_rule2, rule2]   true -> (winCertain'=1) ; 
-	[att_rule2, rule3]   true -> (winCertain'=1) ; 
-        [att_rule2, rule4]   true -> (winCertain'=1) ; 
-	[att_rule2, rule5]   true -> (winCertain'=1) ; 
-        [att_rule2, rule6]   true -> (winCertain'=1) ; 
+// Reward structure for ASA Specialist
+rewards "utilityASA"
+  // win_asa = 1: cost  // Successful ASA interventions
+  win_asa = 1: cost  ;  // Reward for successful ASA interventions 
+  // win_asa = 0: -cost // Unsuccessful ASA interventions
+  win_asa = 0: -cost;  // Penalty for unsuccessful ASA interventions
+endrewards
 
-	[att_rule3, rule1]   true -> (winCertain'=1) ; 
-	[att_rule3, rule2]   true -> (winCertain'=1) ; 
-	[att_rule3, rule3]   true -> (winCertain'=1) ; 
-        [att_rule3, rule4]   true -> (winCertain'=1) ;   
-	[att_rule3, rule5]   true -> (winCertain'=1) ; 
-        [att_rule3, rule6]   true -> (winCertain'=1) ;  
-endmodule
+// Reward structure for Firewall Security Specialist
+rewards "utilityFSA"
+  // win_fsa = 1: cost  // Successful firewall interventions
+  win_fsa = 1: cost;  // Reward for successful firewall interventions 
+  // win_fsa = 0: -cost // Unsuccessful firewall interventions
+  win_fsa = 0: -cost;  // Penalty for unsuccessful firewall interventions
+endrewards
 
+// Reward structure for VPN Specialist
+rewards "utilityVPN"
+  // win_vpn = 1: cost  // Successful VPN interventions
+  win_vpn = 1: cost;  // Reward for successful VPN interventions 
+  // win_vpn = 0: -cost // Unsuccessful VPN interventions
+  win_vpn = 0: -cost;  // Penalty for unsuccessful VPN interventions
+endrewards
 
-label "win1" = win=1 & winProbablyNot=1 & winChancesAboutEven=1 & winProbable=1 & winCertain=1 & winAlmostCertain=1;
-
-label "win0" = win=0 & winProbablyNot=0 & winChancesAboutEven=0 & winProbable=0 & winCertain=0 & winAlmostCertain=0;
-
-formula win1 = win=1 & winProbablyNot=1 & winChancesAboutEven=1 & winProbable=1 & winCertain=1 & winAlmostCertain=1;
-
-formula win0 = win=0 & winProbablyNot=0 & winChancesAboutEven=0 & winProbable=0 & winCertain=0 & winAlmostCertain=0;
-
-// reward structure for player Human
-rewards "utility1"
-	win1 :  cost; //Attacks and non successful interventions
-	win0 :  -cost;// Attacks and successful interventions
+// Reward structure for IPS Specialist
+rewards "utilityIPS"
+  // win_ips = 1: cost  // Successful IPS interventions
+  win_ips = 1: cost;  // Reward for successful IPS interventions 
+ // win_ips = 0: -cost // Unsuccessful IPS interventions
+  win_ips = 0: -cost;  // Penalty for unsuccessful IPS interventions
 endrewards
 
 
-// reward structure for player PDT
-rewards "utility2"
-	win0:  cost;// Attacks and successful interventions
-	win1: -cost;// Attacks and non successful interventions
+// Reward structure for  Specialists
+rewards "utilityWin"
+  win : 1;  // Reward for successful  interventions 
+endrewards
+
+rewards "utilityFail"
+  fail : 1;  // Reward for successful  interventions 
 endrewards

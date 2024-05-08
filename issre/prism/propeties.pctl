@@ -1,56 +1,50 @@
-const int T;
-const int Z;
-const int CRT;
+// Ability to ASA specialist counter attacks
+<<Pnd,Ph1>>Pmax=? [ F (win_asa=1&rounds<=k) ]
 
-// Certainty of fail =0.93
-<<p1>>Pmax=? [ F (win=1&rounds<=k) ]
+// Ability to FSA specialist counter attacks
+<<Pnd,Ph2>>Pmax=? [ F (win_fsa=1&rounds<=k) ]
 
-// Certainty of fail =0.93
-<<p1>>Pmin=? [ F (win=1&rounds<=k) ]
+// Ability to VPN specialist counter attacks
+<<Pnd,Ph3>>Pmax=? [ F (win_vpn=1&rounds<=k) ]
 
-// Certainty of fail =0.93
-<<p2>>Pmin=? [ F (win=0&rounds<=k) ]
+// Ability to IPS specialist counter attacks
+<<Pnd,Ph4>>Pmax=? [ F (win_ips=1&rounds<=k) ]
 
-// Certainty of fail =0.93
-<<p2>>Pmax=? [ F (win=0&rounds<=k) ]
+// Ability to Security specialists to counter attacks
+<<Pnd,Ph1,Ph2,Ph3,Ph4>>Pmax=? [ F ("win"&rounds<=k) ]
 
-// Certainty of fail =0.5
-<<p1>>Pmax=? [ F (winChancesAboutEven=1&rounds<=k) ]
+// Ability to Attackers to fail the system
+1-<<Pnd,Ph1,Ph2,Ph3,Ph4>>Pmax=? [ F ("win"&rounds<=k) ]
 
-// Certainty of fail =0.5
-<<p1>>Pmin=? [ F (winChancesAboutEven=1&rounds<=k) ]
+// Ability to Absolutely Attackers to fail the system
+<<Pnd,Pat>>Pmax=? [ F ("fail"&rounds<=k) ]
 
-// Certainty of fail =0.5
-<<p2>>Pmin=? [ F (winChancesAboutEven=0&rounds<=k) ]
+// cummulative rewards to ASA specialist counter attacks
+<<Pnd,Ph1>>R{"utilityASA"}max=? [ F rounds=k ]
 
-// Certainty of fail =0.5
-<<p2>>Pmax=? [ F (winChancesAboutEven=0&rounds<=k) ]
+// cummulative rewards to FSA specialist counter attacks
+<<Pnd,Ph2>>R{"utilityFSA"}max=? [ F rounds=k ]
 
-// Certainty of fail =0
-<<p1>>Pmax=? [ F (winAlmostCertain=1&rounds<=k) ]
+// cummulative rewards to VPN specialist counter attacks
+<<Pnd,Ph3>>R{"utilityVPN"}max=? [ F rounds=k ]
 
-// Certainty of fail =0
-<<p1>>Pmin=? [ F (winAlmostCertain=1&rounds<=k) ]
+// cummulative rewards to IPS specialist counter attacks
+<<Pnd,Ph4>>R{"utilityIPS"}max=? [ F rounds=k ]
 
-// Certainty of fail =0
-<<p2>>Pmin=? [ F (winAlmostCertain=0&rounds<=k) ]
+// cummulative rewards to specialist in countering attacks
+<<Pnd,Ph1,Ph2,Ph3,Ph4>>R{"utilityWin"}max=? [ F rounds=k ]
 
-// Certainty of fail =0
-<<p2>>Pmax=? [ F (winAlmostCertain=0&rounds<=k) ]
+// cummulative rewards to fail ASA specialist in countering attacks
+<<Pnd,Pat>>R{"utilityASA"}max=? [ F rounds=k ]
 
-// player 1 wins
-<<p1>>Pmax=? [ F ("win1"&rounds<=k) ]
+// cummulative rewards to fail FSA specialist in countering attacks
+<<Pnd,Pat>>R{"utilityFSA"}max=? [ F rounds=k ]
 
-// player 1 wins
-<<p1>>Pmin=? [ F ("win1"&rounds<=k) ]
+// cummulative rewards to fail VPN specialist in countering attacks
+<<Pnd,Pat>>R{"utilityVPN"}max=? [ F rounds=k ]
 
-// player 2 wins
-<<p2>>Pmin=? [ F ("win0"&rounds<=k) ]
+// cummulative rewards to fail IPs specialist in countering attacks
+<<Pnd,Pat>>R{"utilityIPS"}max=? [ F rounds=k ]
 
-// player 2 wins
-<<p2>>Pmax=? [ F ("win0"&rounds<=k) ]
-
-<<p1>>R{"utility1"}max=? [ F rounds=k ]
-
-<<p2>>R{"utility2"}max=? [ F rounds=k ]
+<<Pnd,Pat>>R{"utilityFail"}max=? [ F rounds=k ]
 
