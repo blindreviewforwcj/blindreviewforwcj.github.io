@@ -1,0 +1,91 @@
+==========================================================
+
+We thank the insightful reviewers. We have carefully read the comments, fixed typos, and provide our response below. 
+
+ 
+
+REVIEWER 1: 
+
+---------- 
+ 
+
+1)The authors should clarify this point and, if correct (as it seems from the subsequent sections), modify the workflow of Figure 2 to make it explicit that two different PDTs are learnt.
+-Yes, there are two PDTs generated from the OMNET++ and attack dataset. The workflow update is easy manageable.
+  
+
+2) Could you illustrate in detail the learning processes of PDTs?
+- The learning process is available on our website [28], including code and the algorithm.
+ 
+
+REVIEWER 2: 
+
+---------- 
+
+ 
+
+1) How does your approach compare with other existing methods for evaluating human intervention in cybersecurity?
+-Most existing approaches fail to measure or quantify the human skills required for effective security intervention during attacks. Our method relies on formally modeling these interactions, whereas other methods rely on security awareness surveys to gauge user knowledge and attitudes towards cybersecurity best practices.
+
+  
+
+2) Have you explored alternative attack methods, and how do you intend to apply your findings to a broader range of cybersecurity risks?
+- Literature surveys are typically filled with various attack methods. However, researchers also identify attack and vulnerability patterns that can be distinguished within a modeled scenario (CAPEC catalog). Because we use PDTs, we can learn how attacks are performed on the system by identifying a close form patterns. Our study is not focused on discovering these patterns, but rather on evaluating the risks associated with the interaction between attacks, human capabilities and the modeled system. The application is parameterizable because the workflow is entirely reproducible. By considering various attack representations and cybersecurity threats, we can provide an assessment.
+ 
+
+3) What are the historical attack data sources used in this paper, and how representative are they of real-world cyber threat environments? How do you ensure the accuracy and relevance of this dataset?
+
+-The attack sources are referenced in the paper [29]. These sources represent the infrastructure that was simulated in a controlled environment. The accuracy of our approach is built upon our lab infrastructure by simulating various attacks and performing correlations on the resulting low-level assessments.
+ 
+4) Do you think organizations will incorporate this model into their current cybersecurity frameworks? How?
+-Organizations can incorporate these models to make real-time decisions during cyberattacks. For example, in June 2021, cybersecurity specialists at Fox-IT, a Dutch firm, successfully prevented a major ransomware attack targeting European managed service providers (MSPs). Additionally, universities and organizations run attack simulations to test their defenses and improve response strategies, often collaborating with Cisco specialists.
+
+ 
+5) How do different levels of human expertise impact intervention effectiveness in your model?
+-My model can weight human actions based on expertise levels, prioritizing interventions from more experienced personnel during critical moments. This helps account for the varying effectiveness of human response in cyber incidents.
+ 
+ 
+
+REVIEWER 3: 
+
+---------- 
+
+ 
+
+1)I believe this approach attempted to solve an interesting problem with the multiple-phase workflow, I don't think it would be a practical solution for the addressed problem.
+
+ 
+- As I responsed to previous reviewer question 4
+ 
+ 
+2) It is recommended that authors need to explain the reason why OMNeT++ was chosen to simulate the behaviors (Section 2.B introduces OMNET++ but it did not explicitly explain the reason for choosing that as a proposed approach).
+
+- Reduced Expertise Barrier: (advanced formal modeling expertise isn't necessarily required). (2) Rich Ecosystem: A variety of plugins exist for trace collection, chronogram observation, animation, and protocol validation. (3)Real-World Applicability: Developed code can be deployed on hardware infrastructure for real-time simulations.
+
+ 
+3) What is the attack dataset used for the simulation? In what type of environment (system) was assumed?
+
+-We responded to this question in for review 2. The attack sources are referenced in the paper [29].
+ 
+4) Table 1 shows the summary of human expert on certainty and margin of error. In what aspect such a different type of certainly and error values are derived? It showed the Kent probability, I am wondering if how such value can be used for security decision-making?
+
+ 
+-The Central Intelligence Agency (CIA) reportedly uses the Kent classification system, which assigns confidence levels (words of estimate probability) to intelligence. This system is referenced in the manuscript [8]. Readers can access the declassified document from 2012.
+
+ 
+
+5) It is questionable how such a specialist can do that way in Figure 7. How VPN security specialists cannot (can) have less certainty about DDoS attacks? From my point of view, there is no such relationship between a specialist and the certainty of these attack types. I have no clue how such certainty was mapped between specialists, attacks and certainty.
+
+-This figure is compiled from a Cisco certification document. It's easy to collect such information from referenced documents. [24] [25] [26].
+
+
+
+
+
+
+Paragraph: 
+
+
+There are two PDTs generated from the OMNET++ and attack dataset. The workflow update is easy manageable. Regular decision trees make deterministic predictions, but probabilistic decision trees assign probabilities to each outcome. The learning process is available on our website [28], including code and the algorithm.
+
+The, Most existing approaches fail to measure or quantify the human skills required for effective security intervention during attacks. Our method relies on formally modeling these interactions, whereas other methods rely on security awareness surveys to gauge user knowledge and attitudes towards cybersecurity best practices.  Literature surveys are typically filled with various attack methods and discovery using patterns (CAPEC catalog). PDT can manage the situation.The application is parameterizable because the workflow is entirely reproducible. By considering various attack representations and cybersecurity threats, we can provide an assessment. The attack sources are referenced in the paper [29] and reused in case of our infrastructure. The accuracy of our approach is built upon our lab infrastructure by simulating various attacks and performing correlations on the resulting low-level assessments. Organizations can incorporate these models to make real-time decisions during cyberattacks. For example, in June 2021, cybersecurity specialists at Fox-IT, a Dutch firm, successfully prevented a major ransomware attack targeting European managed service providers (MSPs). Additionally, universities and organizations run attack simulations to test their defenses and improve response strategies, often collaborating with Cisco specialists. My model can weight human actions based on expertise levels, prioritizing interventions from more experienced personnel during critical moments. This helps account for the varying effectiveness of human response in cyber incidents. Adavantage of OMeT++: Reduced Expertise Barrier: (advanced formal modeling expertise isn't necessarily required). (2) Rich Ecosystem: A variety of plugins exist for trace collection, chronogram observation, animation, and protocol validation. (3)Real-World Applicability: Developed code can be deployed on hardware infrastructure for real-time simulations. The Central Intelligence Agency (CIA) reportedly uses the Kent classification system, which assigns confidence levels (words of estimate probability) to intelligence. This system is referenced in the manuscript [8]. Readers can access the declassified document from 2012. Figure 7 is compiled from a Cisco certification document. It's easy to collect such information from referenced documents. [24] [25] [26].
+

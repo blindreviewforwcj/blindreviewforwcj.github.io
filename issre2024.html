@@ -166,7 +166,44 @@
         </tr>
       </table>
     </div>
+        <h1>Probabilistic Decision Tree Algorithm</h1>
+
+    <p>Probabilistic decision trees (PDTs) are a type of machine learning algorithm used for classification tasks. Unlike traditional decision trees that provide deterministic predictions (simply saying "attack" or "no attack"), PDTs assign probabilities to each possible outcome.</p>
+
+    <h2>Here's a breakdown of the PDT algorithm:</h2>
+
+    <ol>
+        <li><b>Data Preparation</b>: The algorithm starts with a dataset containing features (data points) and a target variable (what you want to predict). In cybersecurity, features  describe input features and the target variable could be "attack" or "no attack." 
+        </li>
+        <li><b>Building the Tree</b>:
+            <ul>
+                <li>The algorithm iteratively splits the data based on the most informative feature:
+                    <ul>
+                        <li>It considers each feature and calculates how well it separates the data into categories based on the target variable.</li>
+                        <li>The feature that creates the clearest separation between "attack" and "no attack" is chosen for the first split.</li>
+                    </ul>
+                </li>
+                <li>For each split:
+                    <ul>
+                        <li>The data is divided into branches based on the chosen feature's values (e.g., high network traffic or low traffic).</li>
+                        <li>The algorithm calculates the probability of reaching each outcome (attack or no attack) within each branch. This probability is based on the distribution of the target variable in that branch.</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><b>Stopping Criteria</b>: The splitting process continues until a stopping criteria is met. This could be:
+            <ul>
+                <li>Reaching a maximum depth for the tree (avoiding overly complex trees).</li>
+                <li>Achieving a certain level of purity in the branches (meaning most data points in a branch belong to the same category).</li>
+            </ul>
+        </li>
+        <li><b>Outcome</b>: The final product is a tree structure with branches representing different decision points based on feature values. Each branch also holds the probability of reaching different outcomes (attack or no attack) for that path through the tree.</li>
+    </ol>
   </div>
+
+
+
+
 
   <footer>
     <p><em>This page was developed for ISSRE2024.</em></p>
