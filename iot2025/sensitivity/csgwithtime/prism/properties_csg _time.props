@@ -1,0 +1,14 @@
+const int T;
+const int MAX_Rounds = k;
+const int z;
+
+<<p1,p2>>R{"rescue"}max=? [ F (rounds=k) ]
+
+<<p1,p2>>R{"rescue"}min=? [ F (rounds=k) ]
+
+<<p1,p2>>R{"rescue"}max=? [ F (rounds=k) ]/MAX_Rounds
+
+<<p1,p2>>Pmax=? [ F (("rescue")&rounds<=k) ]
+
+<<p1,p2>>R{"rescue"}max=? [ C<=k]
+

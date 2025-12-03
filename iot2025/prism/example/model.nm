@@ -1,0 +1,52 @@
+ctmc
+
+// --------------------------------------------------
+// System state constants
+// --------------------------------------------------
+const int OPERATIONAL = 2;   // Drone is fully operational
+const int FAILURE     = 1;   // Drone has failed
+
+// --------------------------------------------------
+// Degradation rates (failures per time unit)
+// --------------------------------------------------
+const double p_battery = 0.93;
+const double T = 1*60*60; // seconds
+const double lambda_battery = -(log((1 - p_battery), 2.71828183)) / T;
+
+// --------------------------------------------------
+// Drone 1 module
+// --------------------------------------------------
+module Drone1_battery
+
+    s1 : [FAILURE..OPERATIONAL] init OPERATIONAL; // Current state of Drone1
+
+    // Transition: Operational -> Failure
+    [d1_fail] s1 = OPERATIONAL -> lambda_battery : (s1' = FAILURE);
+
+endmodule
+
+// --------------------------------------------------
+// Drone 2 module
+// --------------------------------------------------
+module Drone2_battery
+
+    s2 : [FAILURE..OPERATIONAL] init OPERATIONAL; // Current state of Drone2
+
+    // Transition: Operational -> Failure
+    [d2_fail] s2 = OPERATIONAL -> lambda_battery : (s2' = FAILURE);
+
+endmodule
+
+// --------------------------------------------------
+// Formula: Entire system is operational
+// --------------------------------------------------
+formula Overall_System_Up = (s1 = OPERATIONAL) & (s2 = OPERATIONAL);
+
+label "Overall_System_Up" = Overall_System_Up;
+
+// --------------------------------------------------
+// Optional: Reward structure to track uptime
+// --------------------------------------------------
+rewards "down"
+    !Overall_System_Up : 1;
+endrewards

@@ -1,0 +1,6 @@
+const int k;
+
+P=? [ F<=k !("Overall_System_Up") ]
+
+R{"down"}=? [ C<=k ]/3600
+
